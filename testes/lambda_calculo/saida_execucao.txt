@@ -1,0 +1,73 @@
+########################################################################
+# CÁLCULO LAMBDA — avaliador por beta-redução em ordem normal
+# Equipe: Yuri Aguiar, João Rath, Pedro Paulo  |  CC5NA
+########################################################################
+
+=== MULT 2 3  (esperado: 6) ===
+Expressão de entrada: MULT 2 3
+  [ 0] (((\m n f. (m (n f))) (\f x. (f (f x)))) (\f x. (f (f (f x)))))
+  [ 1] ((\n f. ((\f x. (f (f x))) (n f))) (\f x. (f (f (f x)))))
+  [ 2] (\f. ((\f x. (f (f x))) ((\f x. (f (f (f x)))) f)))
+  [ 3] (\f x. (((\f x. (f (f (f x)))) f) (((\f x. (f (f (f x)))) f) x)))
+  [ 4] (\f x. ((\x. (f (f (f x)))) (((\f x. (f (f (f x)))) f) x)))
+  [ 5] (\f x. (f (f (f (((\f x. (f (f (f x)))) f) x)))))
+  [ 6] (\f x. (f (f (f ((\x. (f (f (f x)))) x)))))
+  [ 7] (\f x. (f (f (f (f (f (f x)))))))
+Total de beta-reduções: 7   (normalizou = True)
+Resultado decodificado como numeral de Church: 6
+
+=== PRED 3  (esperado: 2) ===
+Expressão de entrada: PRED 3
+  [ 0] ((\n. ((\p. (p (\x y. x))) ((n (\p. (((\x y f. ((f x) y)) ((\p. (p (\x y. y))) p)) ((\n f x. (f ((n f) x))) (…
+  [ 1] ((\p. (p (\x y. x))) (((\f x. (f (f (f x)))) (\p. (((\x y f. ((f x) y)) ((\p. (p (\x y. y))) p)) ((\n f x. (f…
+  [ 2] ((((\f x. (f (f (f x)))) (\p. (((\x y f. ((f x) y)) ((\p. (p (\x y. y))) p)) ((\n f x. (f ((n f) x))) ((\p. (…
+  [ 3] (((\x. ((\p. (((\x y f. ((f x) y)) ((\p. (p (\x y. y))) p)) ((\n f x. (f ((n f) x))) ((\p. (p (\x y. y))) p))…
+  [ 4] (((\p. (((\x y f. ((f x) y)) ((\p. (p (\x y. y))) p)) ((\n f x. (f ((n f) x))) ((\p. (p (\x y. y))) p)))) ((\…
+  [ 5] ((((\x y f. ((f x) y)) ((\p. (p (\x y. y))) ((\p. (((\x y f. ((f x) y)) ((\p. (p (\x y. y))) p)) ((\n f x. (f…
+        ... (25 passos intermediários omitidos) ...
+  [31] (\f x. (f (f ((((\f. ((f (\f x. x)) (\f x. x))) (\x y. y)) f) x))))
+  [32] (\f x. (f (f (((((\x y. y) (\f x. x)) (\f x. x)) f) x))))
+  [33] (\f x. (f (f ((((\y. y) (\f x. x)) f) x))))
+  [34] (\f x. (f (f (((\f x. x) f) x))))
+  [35] (\f x. (f (f ((\x. x) x))))
+  [36] (\f x. (f (f x)))
+Total de beta-reduções: 36   (normalizou = True)
+Resultado decodificado como numeral de Church: 2
+
+=== Booleanos de Church ===
+  AND TRUE FALSE     -> (\x y. y)   (esperado FALSE; 4 reduções)
+  OR FALSE TRUE      -> (\x y. x)   (esperado TRUE; 4 reduções)
+  NOT FALSE          -> (\x y. x)   (esperado TRUE; 3 reduções)
+  ISZERO 0           -> (\x y. x)   (esperado TRUE; 3 reduções)
+  ISZERO 2           -> (\x y. y)   (esperado FALSE; 4 reduções)
+
+########################################################################
+# PROBLEMA-ALVO: FATORIAL  n!  via combinador de ponto fixo Y
+# FACT = Y (\f n. IF (ISZERO n) 1 (MULT n (f (PRED n))))
+########################################################################
+  FACT 0  ->  1    [OK]   (12 beta-reduções, normalizou=True)
+  FACT 1  ->  1    [OK]   (45 beta-reduções, normalizou=True)
+  FACT 2  ->  2    [OK]   (248 beta-reduções, normalizou=True)
+  FACT 3  ->  6    [OK]   (1525 beta-reduções, normalizou=True)
+  FACT 4  ->  24   [OK]   (10384 beta-reduções, normalizou=True)
+
+=== FACT 3  (esperado: 6) — traço resumido ===
+Expressão de entrada: FACT 3
+  [ 0] (((\f. ((\x. (f (x x))) (\x. (f (x x))))) (\f n. ((((\b t e. ((b t) e)) ((\n. ((n (\x x y…
+  [ 1] (((\x. ((\f n. ((((\b t e. ((b t) e)) ((\n. ((n (\x x y. y)) (\x y. x))) n)) (\f x. (f x)…
+  [ 2] (((\f n. ((((\b t e. ((b t) e)) ((\n. ((n (\x x y. y)) (\x y. x))) n)) (\f x. (f x))) (((…
+  [ 3] ((\n. ((((\b t e. ((b t) e)) ((\n. ((n (\x x y. y)) (\x y. x))) n)) (\f x. (f x))) (((\m …
+  [ 4] ((((\b t e. ((b t) e)) ((\n. ((n (\x x y. y)) (\x y. x))) (\f x. (f (f (f x)))))) (\f x. …
+        ... (1516 passos intermediários omitidos) ...
+  [1521] (\f x. (f (f (f (f (f (f (((((\x y. y) (\f x. x)) (\f x. x)) ((((\x. ((\f n. ((((\b t e. …
+  [1522] (\f x. (f (f (f (f (f (f ((((\y. y) (\f x. x)) ((((\x. ((\f n. ((((\b t e. ((b t) e)) ((\…
+  [1523] (\f x. (f (f (f (f (f (f (((\f x. x) ((((\x. ((\f n. ((((\b t e. ((b t) e)) ((\n. ((n (\x…
+  [1524] (\f x. (f (f (f (f (f (f ((\x. x) x))))))))
+  [1525] (\f x. (f (f (f (f (f (f x)))))))
+Total de beta-reduções: 1525   (normalizou = True)
+Resultado decodificado como numeral de Church: 6
+
+=== Omega = (\x. x x) (\x. x x)  —  NÃO possui forma normal ===
+  Após 50 passos: normalizou=False  (esperado False — diverge).
+  A divergência ilustra a indecidibilidade do problema da parada:
+  nenhum avaliador pode, em geral, decidir se um termo tem forma normal.

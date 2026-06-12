@@ -1,0 +1,73 @@
+########################################################################
+# MTND para L = { ww : w ∈ {a,b}+ }
+# Equipe: Yuri Aguiar, João Rath, Pedro Paulo  |  CC5NA
+########################################################################
+Estados (|Q| = 10): ['q0', 'qAccept', 'qCheckSecond', 'qFindLeft', 'qScan', 'qScanRight', 'qSeekSecondA', 'qSeekSecondB', 'qToBoundaryA', 'qToBoundaryB']
+Transições definidas em δ: 37
+Γ = ['A', 'B', 'C', 'Sa', 'Sb', '_', 'a', 'b']   Σ = ['a', 'b']   inicial = q0   F = {'qAccept'}
+
+--- Resultados (aceita/rejeita) ---
+        'aa'  ->  ACEITA    (configs exploradas=13, prof.=11)  [oráculo: sim]
+      'abab'  ->  ACEITA    (configs exploradas=40, prof.=25)  [oráculo: sim]
+    'aabaab'  ->  ACEITA    (configs exploradas=97, prof.=45)  [oráculo: sim]
+        'ab'  ->  rejeita   (configs exploradas=7, prof.=5)  [oráculo: não]
+      'abba'  ->  rejeita   (configs exploradas=32, prof.=20)  [oráculo: não]
+       'aba'  ->  rejeita   (configs exploradas=21, prof.=15)  [oráculo: não]
+       'abc'  ->  rejeita   (configs exploradas=0, prof.=0)  [oráculo: não]
+         'a'  ->  rejeita   (configs exploradas=2, prof.=1)  [oráculo: não]
+          ''  ->  rejeita   (configs exploradas=1, prof.=0)  [oráculo: não]
+
+--- Árvore de computação para 'aa' (ACEITA) ---
+q0: [a] a
+   └─ qScan: a [a]
+      ├─ qScan: a a [_] ✗ (sem transições)
+      └─ qFindLeft: [a] Sa
+         └─ qFindLeft: [_] a Sa
+            └─ qScanRight: [a] Sa
+               └─ qToBoundaryA: A [Sa]
+                  └─ qFindLeft: [A] C
+                     └─ qFindLeft: [_] A C
+                        └─ qScanRight: [A] C
+                           └─ qScanRight: A [C]
+                              └─ qCheckSecond: A C [_]
+                                 └─ qAccept: A C [_] ✓ ACEITA
+
+--- Árvore de computação para 'ab' (REJEITA: todos os ramos morrem) ---
+q0: [a] b
+   └─ qScan: a [b]
+      ├─ qScan: a b [_] ✗ (sem transições)
+      └─ qFindLeft: [a] Sb
+         └─ qFindLeft: [_] a Sb
+            └─ qScanRight: [a] Sb
+               └─ qToBoundaryA: A [Sb] ✗ (sem transições)
+
+--- Ramo aceitante (caminho) para 'abab' ---
+  passo  0: q0: [a] b a b
+  passo  1: qScan: a [b] a b
+  passo  2: qScan: a b [a] b
+  passo  3: qFindLeft: a [b] Sa b
+  passo  4: qFindLeft: [a] b Sa b
+  passo  5: qFindLeft: [_] a b Sa b
+  passo  6: qScanRight: [a] b Sa b
+  passo  7: qToBoundaryA: A [b] Sa b
+  passo  8: qToBoundaryA: A b [Sa] b
+  passo  9: qFindLeft: A [b] C b
+  passo 10: qFindLeft: [A] b C b
+  passo 11: qFindLeft: [_] A b C b
+  passo 12: qScanRight: [A] b C b
+  passo 13: qScanRight: A [b] C b
+  passo 14: qToBoundaryB: A B [C] b
+  passo 15: qSeekSecondB: A B C [b]
+  passo 16: qFindLeft: A B [C] C
+  passo 17: qFindLeft: A [B] C C
+  passo 18: qFindLeft: [A] B C C
+  passo 19: qFindLeft: [_] A B C C
+  passo 20: qScanRight: [A] B C C
+  passo 21: qScanRight: A [B] C C
+  passo 22: qScanRight: A B [C] C
+  passo 23: qCheckSecond: A B C [C]
+  passo 24: qCheckSecond: A B C C [_]
+  passo 25: qAccept: A B C C [_]
+
+--- Verificação contra o oráculo (todas as cadeias |w| <= 9) ---
+  OK: 1023 cadeias testadas, 0 divergências. A máquina reconhece EXATAMENTE L.
