@@ -57,7 +57,7 @@ as duas metades na mesma ordem. Aceita **sse existe ramo aceitante**.
 
 **Verificação exaustiva (oráculo):** a MTND foi comparada com a definição
 matemática de L para **todas** as cadeias de {a,b}* até comprimento **10**
-(2046 cadeias) — **0 divergências**. Logo `L(M) = L` exatamente, nesse universo.
+(2047 cadeias) — **0 divergências**. Logo `L(M) = L` exatamente, nesse universo.
 
 **Interpretação:** a máquina decide L = {ww}, que **não é livre de contexto**;
 todo ramo para (decisor). O número de configurações exploradas cresce com o

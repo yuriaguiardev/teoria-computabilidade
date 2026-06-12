@@ -44,7 +44,8 @@ regra; **ordem normal** e normalização; **numerais/booleanos de Church**;
 **combinador Y** e por que o cálculo puro precisa dele para recursão; divergência
 de Ω e a **parada indecidível**.
 
-**MTND:** a 8-upla `(Q, Σ, Γ, δ, q0, b, F)`; δ como **relação**; **árvore de
+**MTND:** a 7-upla `(Q, Σ, Γ, δ, q0, b, F)` (rejeição por morte do ramo, sem
+estado de rejeição dedicado); δ como **relação**; **árvore de
 computação** e **aceitação por ramo**; por que `L = {ww}` **não é livre de
 contexto**; o papel do **não determinismo** (adivinhar o ponto médio) e a
 verificação determinística; equivalência **MTND ≡ MT determinística**.

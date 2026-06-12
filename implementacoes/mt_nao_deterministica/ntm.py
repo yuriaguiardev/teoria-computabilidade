@@ -12,8 +12,8 @@ configurações. O critério de aceitação é por EXISTÊNCIA DE RAMO ACEITANTE
 
         w ∈ L(M)  sse  ALGUM ramo da árvore atinge um estado de aceitação.
 
-Componentes formais (uma MTND é a 8-upla):
-        M = (Q, Σ, Γ, δ, q0, b, F, q_rej)
+Componentes formais (uma MTND é a 7-upla):
+        M = (Q, Σ, Γ, δ, q0, b, F)
     Q   ... conjunto finito de estados
     Σ   ... alfabeto de entrada
     Γ   ... alfabeto de fita  (Σ ⊆ Γ, e b ∈ Γ \\ Σ)
@@ -21,7 +21,9 @@ Componentes formais (uma MTND é a 8-upla):
     q0  ... estado inicial
     b   ... símbolo branco
     F   ... conjunto de estados de aceitação
-    q_rej . estado de rejeição explícito (opcional)
+A REJEIÇÃO é por MORTE DO RAMO (ausência de transição aplicável), não por um
+estado dedicado. O parâmetro `q_rej` do construtor é uma extensão OPCIONAL (não
+usada por esta máquina) e não faz parte da 7-upla formal.
 
 O simulador explora a árvore por BUSCA EM LARGURA (BFS), com um conjunto de
 configurações já visitadas (evita laços) e um limite de passos. Também sabe

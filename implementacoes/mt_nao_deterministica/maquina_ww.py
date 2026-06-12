@@ -25,7 +25,7 @@ e procura-se o símbolo mais à esquerda ainda não consumido da 2ª metade; se 
 iguais, ambos são marcados; senão o ramo morre. Aceita quando as duas metades se
 esgotam JUNTAS (mesmo comprimento + mesmo conteúdo).
 
-Estados (13): q0, qScan, qFindLeft, qScanRight, qToBoundaryA, qToBoundaryB,
+Estados (10): q0, qScan, qFindLeft, qScanRight, qToBoundaryA, qToBoundaryB,
 qSeekSecondA, qSeekSecondB, qCheckSecond, qAccept (>8, conforme exigido).
 Transições: contadas em tempo de execução (>> 10).
 """

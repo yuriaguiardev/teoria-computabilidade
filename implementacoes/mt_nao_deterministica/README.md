@@ -4,8 +4,9 @@
 **Problema:** reconhecer **L = { ww : w ∈ {a,b}+ }** (palavras duplicadas).
 
 ## 1. Definição formal
-Uma MTND é a 8-upla `M = (Q, Σ, Γ, δ, q0, b, F, q_rej)` em que a transição é uma
-**relação** (não uma função):
+Uma MTND é a 7-upla `M = (Q, Σ, Γ, δ, q0, b, F)` em que a transição é uma
+**relação** (não uma função). A **rejeição** é por *morte do ramo* (não há
+transição aplicável), e não por um estado de rejeição dedicado:
 
 ```
 δ : (Q × Γ) → P(Q × Γ × {L, R, S})
@@ -91,6 +92,13 @@ fita de **um caractere**, os rótulos de dois caracteres foram remapeados:
 transições, conforme o padrão do JFLAP. A aceitação é **por estado final**
 (`qAccept`), coerente com a aceitação por ramo: ao abrir no JFLAP e usar
 *Input → Multiple Run* ou *Step*, a máquina explora os ramos não determinísticos.
+
+> **Movimento `S` (Stay).** A transição `qCheckSecond → qAccept` usa o movimento
+> estacionário `S`. Algumas versões do JFLAP só aceitam `S` se a opção
+> *Preferences → Allow Stay In Transitions* (ou equivalente) estiver **habilitada**.
+> Antes da demonstração ao vivo, habilite essa opção na máquina que será usada,
+> ou rode os exemplos pelo simulador em Python (`maquina_ww.py`), que não depende
+> do JFLAP.
 
 Para regenerar o arquivo:
 ```bash

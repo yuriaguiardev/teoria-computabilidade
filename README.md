@@ -2,7 +2,7 @@
 ## Máquinas Universais, Turing e λ-Cálculo
 
 > **Repositório da equipe.** 
-> **`https://github.com/yuriaguiardev/teoria-computabilidade`** _(preencher antes de submeter no Classroom)_
+> **`https://github.com/yuriaguiardev/teoria-computabilidade`**
 
 ---
 

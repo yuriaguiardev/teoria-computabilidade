@@ -10,192 +10,190 @@ theme: default
 # AV2 — Teoria da Computabilidade
 ## λ-Cálculo · MT Não Determinística
 
-**Turma CC5NA** — Prof. Daniel Leal Souza · 01/2026
+**Turma CC5NA** — Prof. Daniel Leal Souza · Semestre 01/2026
 **Equipe:** Yuri Aguiar · João Rath · Pedro Paulo
 
 Modelos escolhidos (Seção 3):
-- **Opção 7 — λ-Cálculo** → computar o **fatorial** via combinador Y
-- **Opção 4 — MT Não Determinística** → reconhecer **L = { ww : w ∈ {a,b}+ }**
+- **Opção 7 — λ-Cálculo** → *computar* o **fatorial** via combinador Y
+- **Opção 4 — MT Não Determinística** → *decidir* **L = { ww : w ∈ {a,b}+ }**
+
+`github.com/yuriaguiardev/teoria-computabilidade`
 
 ---
 
-## Roteiro (12–15 min) e divisão de falas
+## λ-Cálculo: sintaxe e a única regra
 
-| Bloco | Tempo | Responsável |
-|---|---|---|
-| Teoria (ambos os modelos) | ~3 min | **Yuri** |
-| Demonstração λ-cálculo | ~3 min | **João** |
-| Demonstração MTND | ~3 min | **Pedro** |
-| Análise, computabilidade e limites | ~3 min | **Yuri** |
-| Arguição | ~3 min | **todos** |
-
-> Os dois problemas são **distintos**: um *computa uma função* (fatorial); o outro
-> *decide uma linguagem* ({ww}). Formalismos diferentes, tarefas diferentes.
-
----
-
-# Parte I — λ-Cálculo (teoria)
-
-Sintaxe (definição indutiva de **termo**):
-
+Termo (definição indutiva):
 ```
 M ::= x | (λx. M) | (M N)
       variável | abstração | aplicação
 ```
 
 - **Variáveis livres × ligadas**; **α-equivalência** (`λx.x ≡ λy.y`).
-- **Única regra de cálculo — β-redução:** `(λx. M) N → M[x := N]`.
-- **Substituição com captura evitada** (α-renomeação de variáveis ligadas).
-- **Church-Turing:** λ-cálculo é **Turing-completo** (Kleene, 1936).
+- **Única regra — β-redução:** `(λx. M) N → M[x := N]`.
+- **Substituição com captura evitada:** ao entrar em `λy.P` com `y ∈ FV(N)`,
+  renomeia-se `y` (α-conversão) para um nome fresco.
+
+> Tudo é função; a computação é só aplicar e substituir. É o coração do
+> avaliador em `lambda_calc.py`.
 
 ---
 
-## λ-Cálculo — formalização da implementação
+## Codificações de Church e ordem normal
 
-- **Numerais de Church:** `n = λf x. f (f … (f x))`.
+- **Numeral de Church:** `n = λf x. f (f … (f x))` (aplica `f` n vezes).
 - **Booleanos:** `TRUE = λx y. x`, `FALSE = λx y. y`, `IF b t e = b t e`.
-- **Aritmética:** `MULT = λm n f. m (n f)`, `PRED` via pares.
-- **Recursão** (o cálculo puro não tem!): **combinador Y**
-  `Y = λf. (λx. f (x x)) (λx. f (x x))`, com `Y g = g (Y g)`.
+- **Aritmética:** `MULT = λm n f. m (n f)`; `ISZERO`, `PRED` (via pares).
+- **Estratégia — ordem normal** (leftmost-outermost): pelo **Teorema da
+  Padronização**, acha a forma normal **se ela existir**.
 
-**Problema-alvo:**
+> Não usamos o `int` do Python: o número 3 é a função que aplica algo 3 vezes
+> (`prelude.py`). Ordem normal é o que faz `IF` e `Y` terminarem.
+
+---
+
+## Recursão sem recursão: combinador Y e o problema
+
+- O λ-cálculo puro **não tem recursão nativa**.
+- **Combinador de ponto fixo Y:**
+  `Y = λf. (λx. f (x x)) (λx. f (x x))`, com **`Y g = g (Y g)`**.
+- **Problema-alvo:**
 ```
 FACT = Y (λf n. IF (ISZERO n) 1 (MULT n (f (PRED n))))
 ```
-**Estratégia:** β-redução em **ordem normal** (leftmost-outermost) → encontra a
-forma normal se ela existir (Teorema da Padronização).
+
+> `Y` "amarra o nó": entrega a `f` uma cópia dela mesma, e assim o fatorial pode
+> chamar a si próprio em `f (PRED n)` — sem nenhuma palavra-chave de recursão.
 
 ---
 
-## λ-Cálculo — demonstração (ao vivo)
+## Demonstração: `MULT 2 3 → 6` (traço completo)
 
 `python implementacoes/lambda_calculo/exemplos.py`
 
-`MULT 2 3 → 6` em **7 β-reduções** (traço completo):
+**7 β-reduções**, do termo inicial à forma normal:
 ```
-[0] ((\m n f. (m (n f))) 2 3)
+[0] ((λm n f. m (n f)) <2> <3>)        (2 e 3 expandidos em numerais de Church)
 ...
-[7] (\f x. (f (f (f (f (f (f x)))))))   = numeral 6
+[7] (λf x. f (f (f (f (f (f x))))))    = numeral 6
 ```
+
+- `church_to_int` lê essa forma e decodifica → **6**.
+- A resposta vem de **reescrita de termos**, não de aritmética da linguagem.
+
+---
+
+## Custo real e o limite: FACT e a parada indecidível
+
+Fatorial via Y — valores e **custo medido em β-reduções**:
 
 | Entrada | Resultado | β-reduções |
 |---|---|---|
 | `FACT 2` | 2 | 248 |
-| `FACT 3` | 6 | 1525 |
+| `FACT 3` | 6 | 1 525 |
 | `FACT 4` | **24** | **10 384** |
 
----
-
-## λ-Cálculo — limite e indecidibilidade
-
 ```
-Ω = (λx. x x) (λx. x x)  →  Ω  →  Ω  →  …   (NUNCA para)
+Ω = (λx. x x)(λx. x x)  →  Ω  →  Ω  →  …   (NUNCA para)
 ```
 
-- Nem todo termo tem **forma normal** → usamos um **limite de passos**.
-- Isso reflete a **indecidibilidade do problema da parada**: não há avaliador
-  que decida, para todo termo, se a redução termina.
-- Validado por testes: `test_omega_nao_normaliza`, `test_captura_evitada`.
+- Nem todo termo tem forma normal → usamos **limite de passos**.
+- Reflete a **indecidibilidade do problema da parada**
+  (testes `test_omega_nao_normaliza`, `test_captura_evitada`).
 
 ---
 
-# Parte II — MT Não Determinística (teoria)
+## MTND: formalismo, relação δ e aceitação por ramo
 
-`M = (Q, Σ, Γ, δ, q0, b, F)` com a transição como **relação**:
-
+**7-upla** `M = (Q, Σ, Γ, δ, q0, b, F)` — δ é uma **relação**:
 ```
 δ : (Q × Γ) → P(Q × Γ × {L, R, S})
 ```
 
-- Um mesmo `(estado, símbolo)` pode ter **vários** destinos → **árvore** de
-  computação (não um caminho).
-- **Aceitação por existência de ramo aceitante.**
-- **MTND ≡ MT determinística** (mesma classe de linguagens; custo pode ser
-  exponencial).
+- Um mesmo `(estado, símbolo)` → **vários destinos** ⇒ a computação é uma
+  **árvore** de configurações (não um caminho).
+- **Aceitação:** existe **algum** ramo que atinge `qAccept`.
+- **Rejeição:** **todos** os ramos morrem (sem estado de rejeição dedicado).
 
 ---
 
-## MTND — problema e formalização
+## Problema `L = {ww}` e a estratégia de fita
 
-**L = { ww : w ∈ {a,b}+ }** — palavras duplicadas (não é palíndromo!).
+**L = { ww : w ∈ {a,b}+ }** — palavra concatenada consigo mesma. **Não é palíndromo.**
 
-- **|Q| = 10 (> 8)**, **37 transições (≥ 10)**.
-- **Γ = { a, b, A, B, Sa, Sb, C, _ }** — marcadores de 1ª/2ª metade.
-- **Não determinismo:** em `qScan`, a máquina **adivinha o ponto médio**
-  (continuar na 1ª metade *ou* começar a 2ª aqui).
-- **Verificação determinística:** casa 1ª e 2ª metades **na mesma ordem**,
-  marcando símbolos; aceita se ambas esgotam **juntas**.
+- **Γ = { a, b, A, B, Sa, Sb, C, _ }** — marcadores:
+  - `A`/`B`: 1ª metade já casada · `Sa`/`Sb`: início (adivinhado) da 2ª metade ·
+    `C`: 2ª metade já consumida.
+- **Não determinismo:** em `qScan`, a máquina **adivinha o ponto médio**.
+- **Verificação determinística:** casa 1ª e 2ª metades **posição a posição, na
+  mesma ordem**; aceita se ambas esgotam **juntas**.
 
-> **L = {ww} NÃO é livre de contexto** → um autômato de pilha não basta; precisa
-> do poder da Máquina de Turing.
+> `{ww}` **não é livre de contexto** → um autômato de pilha não basta; exige MT.
 
 ---
 
-## MTND — demonstração (ao vivo)
+## Tabela de transições e o ponto de não determinismo
+
+- **|Q| = 10 (> 8)** · **37 transições (≥ 10)** — atende a Seção 7.
+- Único ponto de **não determinismo** = estado `qScan`:
+```
+δ(qScan, a) = { (qScan, a, R) ,  (qFindLeft, Sa, L) }
+                └ seguir na 1ª metade   └ "aqui começa a 2ª metade"
+```
+- Pares `(estado, símbolo)` **ausentes** ⇒ ramo morre.
+
+| Estado | lê `a` | lê `b` | lê `C` | lê `_` |
+|---|---|---|---|---|
+| **q0** | qScan,a,R | qScan,b,R | — | — |
+| **qScan** | qScan,a,R **\|** qFindLeft,Sa,L | qScan,b,R **\|** qFindLeft,Sb,L | — | — |
+| **qScanRight** | qToBoundaryA,A,R | qToBoundaryB,B,R | qCheckSecond,C,R | — |
+| **qCheckSecond** | — | — | self,C,R | qAccept,_,S |
+
+---
+
+## Demonstração: árvore, ramo aceitante e oráculo
 
 `python implementacoes/mt_nao_deterministica/maquina_ww.py`
 
-Árvore de computação para `ab` (**rejeita** — todos os ramos morrem):
+`ab` → **rejeita** (todos os ramos morrem):
 ```
 q0: [a] b
  └─ qScan: a [b]
-    ├─ qScan: a b [_]  ✗ (não tagueou → morre)
+    ├─ qScan: a b [_]       ✗ (não tagueou → morre)
     └─ qFindLeft: [a] Sb
-       └─ ... qToBoundaryA: A [Sb] ✗ (a ≠ b → morre)
+       └─ … qToBoundaryA: A [Sb] ✗ (a ≠ b → morre)
 ```
 
-| Entrada | Veredito | | Entrada | Veredito |
-|---|---|---|---|---|
-| `aa`, `abab`, `aabaab` | **ACEITA** | | `abba`, `aba`, `abc` | rejeita |
-
----
-
-## MTND — ramo aceitante de `abab`
-
-```
-q0:[a]bab → qScan:a[b]ab → qScan:ab[a]b   (adivinha meio após "ab")
-→ marca 1ª metade e casa com a 2ª, na ordem:
-   qToBoundaryA: A[b]Sa b   (casa 'a' ↔ tag 'a')
-   qToBoundaryB: A B[C]b    (casa 'b' ↔ 'b')
-→ qCheckSecond: A B C C[_]  → qAccept ✓
-```
-
-**Oráculo de verificação:** comparamos a MTND com a definição de L para **todas**
-as 2046 cadeias de {a,b}* até |w| = 10 → **0 divergências**. `L(M) = {ww}`.
+- `abab` → **ACEITA**: imprime o **ramo aceitante** (`q0 … qAccept`).
+- **Oráculo:** comparado com a definição de L em **todas as 2047 cadeias** de
+  `{a,b}*` com `|w| ≤ 10` → **0 divergências** (teste `test_oraculo`).
 
 ---
 
 ## Análise: computabilidade e limites
 
-- **Church-Turing:** λ-cálculo ≡ MT ≡ funções recursivas. Tudo "efetivamente
-  computável" cai numa dessas formulações.
-- **Não determinismo** (MTND) é **conveniência**, não poder extra: adivinhar-e-
-  verificar; toda MTND é simulável por MT determinística.
-- **Hierarquia:** `{ww}` separa **livres de contexto** (autômato de pilha) das
-  linguagens que **exigem** uma MT.
-- **Limites:** parada **indecidível** (Ω no λ-cálculo; ramos não-parantes no caso
-  geral de MTs) → ambos os simuladores usam **limite de passos**.
+- **Church-Turing:** λ-cálculo ≡ MT ≡ funções recursivas (Kleene, 1936). Tudo
+  "efetivamente computável" cai numa dessas formulações.
+- **Não determinismo é conveniência, não poder extra:** toda MTND é simulável
+  por MT determinística (custo possivelmente exponencial).
+- **Hierarquia de Chomsky:** `{ww}` **não é livre de contexto** ⇒ exige uma MT;
+  um autômato de pilha não basta.
+- **Limites:** parada **indecidível** — Ω no λ-cálculo; ramos não-parantes no
+  caso geral ⇒ ambos os simuladores usam **limite de passos**.
 
 ---
 
-## Engenharia e reprodutibilidade
+## Conclusão
 
-- **Python 3.10+**, **só biblioteca padrão** (sem `pip install`).
-- **32 testes** (`python -m unittest discover -s testes`), incluindo o **oráculo**.
-- Formalismo **explícito**: parser + β-redução; δ como relação + árvore — nada de
-  "função pronta" devolvendo a resposta.
-- Repositório com README, rastreamentos, saídas brutas e declaração de uso de IA.
+- **Entregamos os dois modelos** com implementação própria, testes e rastreamento:
+  - λ funcional (reescrita real de termos, **fatorial via Y**);
+  - MTND que **decide `{ww}`** (árvore, ramo aceitante, **oráculo**).
+- **Reprodutível:** Python 3.10+, **só biblioteca padrão**; **32 testes**
+  (`python -m unittest discover -s testes`).
+- **Formalismo explícito:** parser + β-redução; δ como relação + árvore —
+  nada de "função pronta" devolvendo a resposta.
 
----
+**Referências:** Sipser (2013); Pierce (2002); Barendregt (1984);
+Diverio & Menezes (2011); Church (1936); Turing (1936).
 
-# Obrigado!
-
-**Equipe:** Yuri Aguiar · João Rath · Pedro Paulo — CC5NA
-
-Repositório: `https://github.com/yuriaguiardev/teoria-computabilidade`
-
-**Referências (resumo):** Sipser (2013); Pierce (2002); Barendregt (1984);
-Diverio & Menezes (2011); Church (1936); Turing (1936). *(lista completa em
-`referencias.md`)*
-
-**Perguntas?**
+**Equipe:** Yuri Aguiar · João Rath · Pedro Paulo — CC5NA · **Perguntas?**
