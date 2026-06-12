@@ -192,7 +192,7 @@ as 2046 cadeias de {a,b}* até |w| = 10 → **0 divergências**. `L(M) = {ww}`.
 
 **Equipe:** Yuri Aguiar · João Rath · Pedro Paulo — CC5NA
 
-Repositório: `https://github.com/<usuario>/<repo>`
+Repositório: `https://github.com/yuriaguiardev/teoria-computabilidade`
 
 **Referências (resumo):** Sipser (2013); Pierce (2002); Barendregt (1984);
 Diverio & Menezes (2011); Church (1936); Turing (1936). *(lista completa em

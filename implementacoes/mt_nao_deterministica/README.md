@@ -78,6 +78,25 @@ símbolo) **ausentes** = ramo morre (sem transição).
 para **todas** as cadeias de {a,b}* até um comprimento dado. Resultado:
 **0 divergências** até |w| = 10 (ver `testes/`).
 
+## 7. Arquivo JFLAP (`maquina_ww.jff`)
+Além do simulador em Python, a mesma máquina está disponível em **JFLAP**
+(`maquina_ww.jff`), gerada por `gerar_jflap.py`. Como o JFLAP exige símbolos de
+fita de **um caractere**, os rótulos de dois caracteres foram remapeados:
+
+| Python | `Sa` | `Sb` | `C` | `_` (branco) |
+|---|---|---|---|---|
+| **JFLAP** | `X` | `Y` | `Z` | célula vazia |
+
+(`a, b, A, B` são iguais nos dois.) O branco aparece como campo vazio nas
+transições, conforme o padrão do JFLAP. A aceitação é **por estado final**
+(`qAccept`), coerente com a aceitação por ramo: ao abrir no JFLAP e usar
+*Input → Multiple Run* ou *Step*, a máquina explora os ramos não determinísticos.
+
+Para regenerar o arquivo:
+```bash
+python gerar_jflap.py
+```
+
 ## Executar
 ```bash
 python maquina_ww.py
