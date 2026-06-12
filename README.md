@@ -1,8 +1,8 @@
 # AV2 — Teoria da Computabilidade
 ## Máquinas Universais, Turing e λ-Cálculo
 
-> **Repositório da equipe.** Cole aqui o link público do GitHub após o `push`:
-> **`https://github.com/<usuario>/<repo>`** _(preencher antes de submeter no Classroom)_
+> **Repositório da equipe.** 
+> **`https://github.com/yuriaguiardev/teoria-computabilidade`** _(preencher antes de submeter no Classroom)_
 
 ---
 
@@ -119,5 +119,3 @@ e [`implementacoes/mt_nao_deterministica/README.md`](implementacoes/mt_nao_deter
 ## Uso de IA e referências
 Veja [`uso_ia.md`](uso_ia.md) e [`referencias.md`](referencias.md).
 
-> **Registro de versão:** Qualquer alteração feita após o prazo de entrega será
-> identificada nesta seção, preservando-se a versão entregue dentro do prazo.
