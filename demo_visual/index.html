@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AV2 — Teoria da Computabilidade · Visualizador</title>
+<style>
+  :root{
+    --bg:#0f1620; --panel:#16202e; --panel2:#1d2a3a; --ink:#e8eef6;
+    --muted:#93a4b8; --line:#27384c; --accent:#3ea6ff; --accent2:#19c37d;
+    --warn:#ff6b6b; --gold:#ffcf5c;
+    --mono:'Consolas','SF Mono','Cascadia Code',ui-monospace,monospace;
+    --sans:system-ui,'Segoe UI',Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  header{padding:22px 26px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#16202e,#0f1620)}
+  header h1{margin:0;font-size:20px;letter-spacing:.3px}
+  header .sub{color:var(--muted);font-size:13px;margin-top:4px}
+  .wrap{max-width:1080px;margin:0 auto;padding:22px 26px 60px}
+  .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+  .tab{padding:10px 18px;border:1px solid var(--line);background:var(--panel);
+    color:var(--muted);border-radius:10px;cursor:pointer;font-size:14px;font-weight:600}
+  .tab.active{color:#fff;border-color:var(--accent);background:var(--panel2);
+    box-shadow:0 0 0 1px var(--accent) inset}
+  .view{display:none}.view.active{display:block}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;margin-bottom:18px}
+  .explain{background:var(--panel2);border-left:3px solid var(--accent);
+    border-radius:8px;padding:12px 16px;color:var(--muted);font-size:13.5px;margin-bottom:16px}
+  .explain b{color:var(--ink)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  input[type=text]{flex:1;min-width:240px;background:#0c131c;color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+    font-family:var(--mono);font-size:15px}
+  button.go{background:var(--accent);color:#04223b;border:none;border-radius:10px;
+    padding:12px 22px;font-weight:700;font-size:14px;cursor:pointer}
+  button.go:hover{filter:brightness(1.08)}
+  .presets{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:#0c131c;border:1px solid var(--line);color:var(--accent);
+    border-radius:999px;padding:6px 14px;font-family:var(--mono);font-size:13px;cursor:pointer}
+  .chip:hover{border-color:var(--accent)}
+  .muted{color:var(--muted)}
+  .badge{display:inline-block;padding:6px 14px;border-radius:999px;font-weight:800;
+    font-size:14px;letter-spacing:.5px}
+  .badge.ok{background:rgba(25,195,125,.15);color:var(--accent2);border:1px solid var(--accent2)}
+  .badge.no{background:rgba(255,107,107,.13);color:var(--warn);border:1px solid var(--warn)}
+  .stat{display:inline-block;margin-right:18px;color:var(--muted);font-size:13px}
+  .stat b{color:var(--ink);font-family:var(--mono)}
+  pre{background:#0a0f16;border:1px solid var(--line);border-radius:10px;padding:14px;
+    overflow:auto;font-family:var(--mono);font-size:13px;color:#d6e2f0;margin:0}
+  .stepbar{display:flex;align-items:center;gap:10px;margin:14px 0}
+  .stepbar button{background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+    border-radius:8px;padding:8px 14px;cursor:pointer;font-size:14px;font-weight:700}
+  .stepbar button:hover{border-color:var(--accent)}
+  .stepbar .idx{font-family:var(--mono);color:var(--muted);font-size:13px}
+  select.speed{background:var(--panel2);color:var(--ink);border:1px solid var(--line);
+    border-radius:8px;padding:8px 10px;font-size:13px;cursor:pointer;font-weight:700}
+  select.speed:hover{border-color:var(--accent)}
+  input[type=range]{flex:1;accent-color:var(--accent)}
+  .term{font-family:var(--mono);font-size:15px;background:#0a0f16;border:1px solid var(--line);
+    border-radius:10px;padding:18px;white-space:pre-wrap;word-break:break-word;min-height:60px}
+  .result{margin-top:14px;font-size:15px}
+  .result .num{font-family:var(--mono);font-size:30px;color:var(--gold);font-weight:800}
+  /* fita da MTND */
+  .tape{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
+  .cell{min-width:38px;height:46px;display:flex;align-items:center;justify-content:center;
+    background:#0c131c;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);
+    font-size:18px;font-weight:700}
+  .cell.head{border-color:var(--accent);background:rgba(62,166,255,.16);
+    box-shadow:0 0 0 1px var(--accent) inset;color:#fff}
+  .cell.A,.cell.B{color:var(--accent2)}
+  .cell.C{color:var(--gold)}
+  .statetag{font-family:var(--mono);font-size:14px;color:var(--accent);margin-bottom:8px;font-weight:700}
+  .err{color:var(--warn);font-family:var(--mono);font-size:14px}
+  details{margin-top:14px}summary{cursor:pointer;color:var(--accent);font-weight:600}
+  h3{margin:0 0 6px;font-size:15px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:12.5px}
+  .legend span b{font-family:var(--mono)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Teoria da Computabilidade — AV2 · Visualizador de execução</h1>
+  <div class="sub">λ-Cálculo (fatorial via combinador Y) · MT Não Determinística (L = { ww })
+    &nbsp;—&nbsp; Equipe: Yuri Aguiar, João Rath, Pedro Paulo · CC5NA</div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <div class="tab active" data-v="lambda">λ-Cálculo</div>
+    <div class="tab" data-v="ntm">MT Não Determinística</div>
+  </div>
+
+  <!-- ============ LAMBDA ============ -->
+  <section class="view active" id="view-lambda">
+    <div class="explain">
+      No λ-cálculo <b>só existe função</b>. Números (numerais de Church), verdadeiro/falso e
+      até a recursão (combinador <b>Y</b>) são funções. Calcular = repetir uma única regra, a
+      <b>β-redução</b> (substituir o parâmetro pelo argumento), até não dar mais para simplificar.
+      Cada linha abaixo é <b>um</b> passo dessa redução.
+    </div>
+    <div class="card">
+      <div class="row">
+        <input type="text" id="lexpr" value="MULT 2 3" spellcheck="false">
+        <button class="go" id="lgo">Reduzir ▶</button>
+      </div>
+      <div class="presets" id="lpresets">
+        <span class="chip">MULT 2 3</span>
+        <span class="chip">AND TRUE FALSE</span>
+        <span class="chip">ISZERO 0</span>
+        <span class="chip">PRED 3</span>
+        <span class="chip">FACT 3</span>
+        <span class="chip">(\x. x x) (\x. x x)</span>
+      </div>
+    </div>
+
+    <div class="card" id="lout" style="display:none">
+      <div id="lstats"></div>
+      <div class="stepbar">
+        <button id="lhome" title="voltar ao início">⏮ início</button>
+        <button id="lprev">◀</button>
+        <button id="lplay">▶️ play</button>
+        <button id="lnext">▶</button>
+        <button id="lend" title="pular direto para o resultado">⏭ final</button>
+        <select id="lspeed" class="speed" title="velocidade do play">
+          <option value="0.5">🐢 0,5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+          <option value="4">⚡ 4×</option>
+          <option value="8">🚀 8×</option>
+        </select>
+        <input type="range" id="lrange" min="0" max="0" value="0">
+        <span class="idx" id="lidx"></span>
+      </div>
+      <div class="term" id="lterm"></div>
+      <div class="result" id="lresult"></div>
+    </div>
+    <div class="card err" id="lerr" style="display:none"></div>
+  </section>
+
+  <!-- ============ MTND ============ -->
+  <section class="view" id="view-ntm">
+    <div class="explain">
+      A máquina aceita palavras que são uma <b>metade repetida</b> (ww): <b>aa, abab, aabaab</b>.
+      Como ela é <b>não determinística</b>, ela <b>adivinha</b> onde termina a 1ª metade (cada
+      palpite vira um ramo) e depois <b>confere</b> se as duas metades batem, posição a posição.
+      <b>Aceita se algum ramo</b> chegar em <b>qAccept</b>; rejeita se todos morrerem.
+    </div>
+    <div class="card">
+      <div class="row">
+        <input type="text" id="nword" value="abab" spellcheck="false">
+        <button class="go" id="ngo">Executar ▶</button>
+      </div>
+      <div class="presets" id="npresets">
+        <span class="chip">aa</span>
+        <span class="chip">abab</span>
+        <span class="chip">aabaab</span>
+        <span class="chip">abba</span>
+        <span class="chip">aba</span>
+        <span class="chip">abc</span>
+      </div>
+    </div>
+
+    <div class="card" id="nout" style="display:none">
+      <div id="nverdict"></div>
+      <div id="nstats" style="margin-top:10px"></div>
+
+      <div id="npathbox" style="margin-top:16px">
+        <h3>Ramo aceitante — a fita passo a passo</h3>
+        <div class="stepbar">
+          <button id="nhome" title="voltar ao início">⏮ início</button>
+          <button id="nprev">◀</button>
+          <button id="nplay">▶️ play</button>
+          <button id="nnext">▶</button>
+          <button id="nend" title="pular direto para o resultado">⏭ final</button>
+          <select id="nspeed" class="speed" title="velocidade do play">
+            <option value="0.5">🐢 0,5×</option>
+            <option value="1" selected>1×</option>
+            <option value="2">2×</option>
+            <option value="4">⚡ 4×</option>
+            <option value="8">🚀 8×</option>
+          </select>
+          <input type="range" id="nrange" min="0" max="0" value="0">
+          <span class="idx" id="nidx"></span>
+        </div>
+        <div class="statetag" id="nstate"></div>
+        <div class="tape" id="ntape"></div>
+        <div class="legend">
+          <span><b>a b</b> não processado</span>
+          <span><b>A B</b> 1ª metade conferida</span>
+          <span><b>Sa Sb</b> palpite do meio</span>
+          <span><b>C</b> 2ª metade casada</span>
+          <span>[célula azul] = cabeçote</span>
+        </div>
+      </div>
+
+      <details>
+        <summary>Ver árvore de computação (ramos)</summary>
+        <pre id="ntree" style="margin-top:10px"></pre>
+      </details>
+    </div>
+  </section>
+</div>
+
+<script>
+// -------- navegação de abas --------
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('view-'+t.dataset.v).classList.add('active');
+  };
+});
+
+function api(url){return fetch(url).then(r=>r.json());}
+
+// =================== LAMBDA ===================
+let L={passos:[],i:0,timer:null};
+const lterm=document.getElementById('lterm'), lrange=document.getElementById('lrange'),
+      lidx=document.getElementById('lidx');
+
+function lShow(){
+  if(!L.passos.length)return;
+  const [idx,termo]=L.passos[L.i];
+  lterm.textContent=termo;
+  lrange.value=L.i; lrange.max=L.passos.length-1;
+  lidx.textContent='passo '+idx+' / '+(L.total-1);
+}
+function lStop(){if(L.timer){clearInterval(L.timer);L.timer=null;
+  document.getElementById('lplay').textContent='▶️ play';}}
+document.getElementById('lprev').onclick=()=>{lStop();L.i=Math.max(0,L.i-1);lShow();};
+document.getElementById('lnext').onclick=()=>{lStop();L.i=Math.min(L.passos.length-1,L.i+1);lShow();};
+document.getElementById('lhome').onclick=()=>{lStop();L.i=0;lShow();};
+document.getElementById('lend').onclick=()=>{lStop();L.i=L.passos.length-1;lShow();};
+lrange.oninput=()=>{lStop();L.i=+lrange.value;lShow();};
+function lDelay(){return Math.round(420/(parseFloat(document.getElementById('lspeed').value)||1));}
+function lStart(){
+  if(L.timer)clearInterval(L.timer);
+  document.getElementById('lplay').textContent='⏸ pausar';
+  L.timer=setInterval(()=>{
+    if(L.i>=L.passos.length-1){lStop();return;}
+    L.i++;lShow();
+  },lDelay());
+}
+document.getElementById('lplay').onclick=()=>{ if(L.timer){lStop();}else{lStart();} };
+document.getElementById('lspeed').onchange=()=>{ if(L.timer)lStart(); };  // ajusta na hora
+
+function runLambda(){
+  lStop();
+  const expr=document.getElementById('lexpr').value;
+  document.getElementById('lout').style.display='none';
+  document.getElementById('lerr').style.display='none';
+  api('/api/lambda?expr='+encodeURIComponent(expr)).then(d=>{
+    if(d.erro){const e=document.getElementById('lerr');
+      e.style.display='block';e.textContent='⚠ '+d.erro;return;}
+    L.passos=d.passos;L.total=d.total;L.i=0;
+    document.getElementById('lout').style.display='block';
+    let s='<span class="stat">β-reduções: <b>'+d.steps+'</b></span>'+
+          '<span class="stat">normalizou: <b>'+(d.ok?'sim':'não')+'</b></span>';
+    if(d.omitted>0)s+='<span class="stat muted">(exibindo '+d.passos.length+
+      ' de '+d.total+' linhas — '+d.omitted+' intermediárias omitidas)</span>';
+    document.getElementById('lstats').innerHTML=s;
+    const res=document.getElementById('lresult');
+    if(d.decoded!==null && d.decoded!==undefined){
+      res.innerHTML='Resultado (numeral de Church) = <span class="num">'+d.decoded+'</span>';
+    }else if(!d.ok){
+      res.innerHTML='<span class="badge no">SEM FORMA NORMAL</span> '+
+        '<span class="muted">o termo diverge — ilustra a indecidibilidade da parada.</span>';
+    }else{
+      res.innerHTML='<span class="muted">forma normal: </span><code>'+
+        d.result.replace(/</g,'&lt;')+'</code>';
+    }
+    lShow();
+  });
+}
+document.getElementById('lgo').onclick=runLambda;
+document.getElementById('lexpr').addEventListener('keydown',e=>{if(e.key==='Enter')runLambda();});
+document.querySelectorAll('#lpresets .chip').forEach(c=>c.onclick=()=>{
+  document.getElementById('lexpr').value=c.textContent;runLambda();});
+
+// =================== MTND ===================
+let N={path:[],i:0,timer:null};
+const ntape=document.getElementById('ntape'), nstate=document.getElementById('nstate'),
+      nrange=document.getElementById('nrange'), nidx=document.getElementById('nidx');
+
+function nShow(){
+  if(!N.path||!N.path.length)return;
+  const step=N.path[N.i];
+  nstate.textContent='estado: '+step.state;
+  ntape.innerHTML='';
+  step.cells.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='cell'+(c.head?' head':'')+(['A','B','C'].includes(c.sym)?' '+c.sym:'');
+    d.textContent=c.sym;ntape.appendChild(d);
+  });
+  nrange.value=N.i; nrange.max=N.path.length-1;
+  nidx.textContent='passo '+N.i+' / '+(N.path.length-1);
+}
+function nStop(){if(N.timer){clearInterval(N.timer);N.timer=null;
+  document.getElementById('nplay').textContent='▶️ play';}}
+document.getElementById('nprev').onclick=()=>{nStop();N.i=Math.max(0,N.i-1);nShow();};
+document.getElementById('nnext').onclick=()=>{nStop();N.i=Math.min(N.path.length-1,N.i+1);nShow();};
+document.getElementById('nhome').onclick=()=>{nStop();N.i=0;nShow();};
+document.getElementById('nend').onclick=()=>{nStop();N.i=N.path.length-1;nShow();};
+nrange.oninput=()=>{nStop();N.i=+nrange.value;nShow();};
+function nDelay(){return Math.round(520/(parseFloat(document.getElementById('nspeed').value)||1));}
+function nStart(){
+  if(!N.path||!N.path.length)return;
+  if(N.timer)clearInterval(N.timer);
+  document.getElementById('nplay').textContent='⏸ pausar';
+  N.timer=setInterval(()=>{
+    if(N.i>=N.path.length-1){nStop();return;}
+    N.i++;nShow();
+  },nDelay());
+}
+document.getElementById('nplay').onclick=()=>{ if(N.timer){nStop();}else{nStart();} };
+document.getElementById('nspeed').onchange=()=>{ if(N.timer)nStart(); };  // ajusta na hora
+
+function runNtm(){
+  nStop();
+  const word=document.getElementById('nword').value;
+  document.getElementById('nout').style.display='none';
+  api('/api/ntm?word='+encodeURIComponent(word)).then(d=>{
+    document.getElementById('nout').style.display='block';
+    const v=document.getElementById('nverdict');
+    const w=word===''?'(vazia)':word;
+    v.innerHTML='Entrada <code>'+w.replace(/</g,'&lt;')+'</code> → '+
+      (d.accepted?'<span class="badge ok">ACEITA ✓</span>':'<span class="badge no">REJEITA ✗</span>');
+    let s='<span class="stat">|Q| = <b>'+d.n_estados+'</b></span>'+
+          '<span class="stat">δ = <b>'+d.n_transicoes+'</b> transições</span>'+
+          '<span class="stat">configs exploradas: <b>'+d.configs+'</b></span>'+
+          '<span class="stat">definição matemática (oráculo): <b>'+(d.oraculo?'pertence':'não pertence')+'</b></span>';
+    if(d.invalido)s+='<span class="stat err">símbolo fora de Σ={a,b}</span>';
+    document.getElementById('nstats').innerHTML=s;
+    document.getElementById('ntree').textContent=d.tree;
+    const pathbox=document.getElementById('npathbox');
+    if(d.path){
+      pathbox.style.display='block';N.path=d.path;N.i=0;nShow();
+    }else{
+      pathbox.style.display='none';N.path=[];
+    }
+  });
+}
+document.getElementById('ngo').onclick=runNtm;
+document.getElementById('nword').addEventListener('keydown',e=>{if(e.key==='Enter')runNtm();});
+document.querySelectorAll('#npresets .chip').forEach(c=>c.onclick=()=>{
+  document.getElementById('nword').value=c.textContent;runNtm();});
+
+// roda os exemplos iniciais
+runLambda();
+</script>
+</body>
+</html>
